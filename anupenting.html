@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>untuk kamu, someone special</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Playfair+Display:ital,wght@0,600;1,500&family=Caveat:wght@600;700&display=swap');
+
+  :root{
+    --wine:#5c1f2b;
+    --wine-deep:#3c1420;
+    --paper:#fbf3e7;
+    --blush:#f1d6cf;
+    --gold:#c9a15a;
+    --gold-light:#e8c989;
+    --ink:#3a1620;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{
+    height:100%;
+    width:100%;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(232,201,137,0.18), transparent 55%),
+      linear-gradient(160deg, var(--wine) 0%, var(--wine-deep) 100%);
+    font-family:'Cormorant Garamond', serif;
+  }
+  #stage{
+    position:relative;
+    height:100vh;
+    width:100vw;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .layer{ position:absolute; inset:0; pointer-events:none; }
+
+  /* ambient gold dust */
+  .dust{
+    position:absolute;
+    bottom:-6vh;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background: var(--gold-light);
+    opacity:0;
+    box-shadow:0 0 6px var(--gold-light);
+    animation: rise linear infinite;
+  }
+  @keyframes rise{
+    0%{ transform: translateY(0) translateX(0); opacity:0; }
+    12%{ opacity:0.85; }
+    100%{ transform: translateY(-105vh) translateX(var(--drift,0px)); opacity:0; }
+  }
+
+  /* ===== ENVELOPE ===== */
+  #envelope-wrap{
+    position:relative;
+    z-index:5;
+    cursor:pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  #envelope-wrap.hidden{
+    opacity:0;
+    transform: scale(0.85);
+    pointer-events:none;
+  }
+  .envelope{
+    position:relative;
+    width:240px;
+    height:160px;
+  }
+  .env-body{
+    position:absolute;
+    inset:0;
+    background: linear-gradient(160deg, var(--paper), var(--blush));
+    border-radius:6px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  }
+  .env-shadow-flap{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:80px;
+    background: linear-gradient(160deg, #e9d2c8, var(--blush));
+    clip-path: polygon(0 0, 100% 0, 50% 70%);
+    border-radius: 6px 6px 0 0;
+    z-index:1;
+  }
+  .env-flap{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:90px;
+    background: linear-gradient(150deg, var(--wine), #7a2c3a);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    border-radius: 6px 6px 0 0;
+    transform-origin: top center;
+    transform: rotateX(0deg);
+    transition: transform 0.9s cubic-bezier(.6,-0.1,.2,1.3);
+    z-index:3;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  }
+  #envelope-wrap.open .env-flap{
+    transform: rotateX(180deg);
+  }
+  .seal{
+    position:absolute;
+    top:48px;
+    left:50%;
+    transform:translate(-50%,0);
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--gold-light), var(--gold) 70%, #9c7a3a);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4), inset 0 0 6px rgba(255,255,255,0.4);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-weight:600;
+    color: var(--wine-deep);
+    font-size:20px;
+    z-index:4;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  #envelope-wrap.open .seal{
+    opacity:0;
+    transform:translate(-50%,0) scale(0.4);
+  }
+  .hint{
+    position:absolute;
+    bottom:-38px;
+    left:0; right:0;
+    text-align:center;
+    color: var(--blush);
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:14px;
+    letter-spacing:1px;
+    opacity:0.85;
+    animation: pulseHint 2.2s ease-in-out infinite;
+  }
+  @keyframes pulseHint{
+    0%,100%{ opacity:0.5; }
+    50%{ opacity:0.95; }
+  }
+
+  /* ===== LETTER ===== */
+  #letter{
+    position:absolute;
+    z-index:6;
+    width:min(86vw, 380px);
+    max-height:82vh;
+    overflow-y:auto;
+    background: var(--paper);
+    border-radius:4px;
+    padding:38px 28px 32px;
+    text-align:center;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.45);
+    opacity:0;
+    transform: translateY(40px) scale(0.92);
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.2,.8,.2,1);
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 30px, rgba(92,31,43,0.05) 30px 31px);
+  }
+  #letter.show{
+    opacity:1;
+    transform: translateY(0) scale(1);
+  }
+  .corner{
+    position:absolute;
+    width:14px;
+    height:14px;
+    border: 1px solid var(--gold);
+    opacity:0.6;
+  }
+  .corner.tl{ top:10px; left:10px; border-right:none; border-bottom:none; }
+  .corner.tr{ top:10px; right:10px; border-left:none; border-bottom:none; }
+  .corner.bl{ bottom:10px; left:10px; border-right:none; border-top:none; }
+  .corner.br{ bottom:10px; right:10px; border-left:none; border-top:none; }
+
+  .eyebrow{
+    font-family:'Cormorant Garamond', serif;
+    font-size:11px;
+    letter-spacing:4px;
+    text-transform:uppercase;
+    color: var(--gold);
+  }
+  .title{
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-weight:600;
+    font-size: clamp(28px, 8vw, 38px);
+    color: var(--wine);
+    margin-top:8px;
+    line-height:1.15;
+  }
+  .divider{
+    width:60px;
+    height:1px;
+    background: var(--gold);
+    margin:16px auto 18px;
+    opacity:0.7;
+  }
+  .body-text{
+    font-size:16px;
+    line-height:1.85;
+    color: var(--ink);
+    text-align:left;
+  }
+  .body-text p{ margin-bottom:12px; }
+
+  .sign-off{
+    margin-top:24px;
+    text-align:right;
+  }
+  .sign-off .with{
+    font-size:14px;
+    color: var(--ink);
+    font-style:italic;
+    opacity:0.8;
+  }
+  .sign-off .name{
+    font-family:'Caveat', cursive;
+    font-size:38px;
+    color: var(--wine);
+    margin-top:2px;
+    line-height:1;
+  }
+
+  .close-hint{
+    margin-top:22px;
+    text-align:center;
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color: var(--wine);
+    opacity:0.55;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="layer" id="dustLayer"></div>
+
+  <div id="envelope-wrap">
+    <div class="envelope">
+      <div class="env-body"></div>
+      <div class="env-shadow-flap"></div>
+      <div class="env-flap"></div>
+      <div class="seal">A</div>
+    </div>
+    <div class="hint">ketuk untuk membuka</div>
+  </div>
+
+  <div id="letter">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <div class="eyebrow">untuk kamu</div>
+    <div class="title">someone special</div>
+    <div class="divider"></div>
+
+    <div class="body-text">
+      <p>Di antara banyak hal yang pernah aku tulis, ini adalah yang paling tulus: kamu adalah alasan kecil yang membuat hari biasa terasa istimewa.</p>
+      <p>Semoga apa pun yang sedang kamu jalani hari ini, kamu tahu ada seseorang yang mendoakan dan menghargaimu dengan sepenuh hati. 💌</p>
+    </div>
+
+    <div class="sign-off">
+      <div class="with">dengan sepenuh hati,</div>
+      <div class="name">Alifia Nur Okthary</div>
+    </div>
+
+    <div class="close-hint">ketuk di luar surat untuk menutup</div>
+  </div>
+</div>
+
+<script>
+  const wrap = document.getElementById('envelope-wrap');
+  const letter = document.getElementById('letter');
+  const dustLayer = document.getElementById('dustLayer');
+
+  wrap.addEventListener('click', () => {
+    wrap.classList.add('open');
+    setTimeout(() => {
+      wrap.classList.add('hidden');
+      letter.classList.add('show');
+    }, 500);
+  });
+
+  document.getElementById('stage').addEventListener('click', (e) => {
+    if (letter.classList.contains('show') && !letter.contains(e.target)) {
+      letter.classList.remove('show');
+      setTimeout(() => {
+        wrap.classList.remove('hidden','open');
+      }, 500);
+    }
+  });
+
+  function spawnDust(){
+    const el = document.createElement('div');
+    el.className = 'dust';
+    const left = Math.random()*100;
+    const duration = 6 + Math.random()*6;
+    const drift = (Math.random()*60 - 30) + 'px';
+    el.style.left = left + 'vw';
+    el.style.setProperty('--drift', drift);
+    el.style.animationDuration = duration + 's';
+    dustLayer.appendChild(el);
+    setTimeout(()=> el.remove(), duration*1000 + 200);
+  }
+  for(let i=0;i<16;i++) setTimeout(spawnDust, i*200);
+  setInterval(spawnDust, 380);
+</script>
+</body>
+</html>
